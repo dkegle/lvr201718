@@ -1,4 +1,4 @@
-#Repository for LVR homework
+# Repository for LVR homework
 
 
-##SAT solver
+## SAT solver
