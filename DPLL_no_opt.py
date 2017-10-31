@@ -1,4 +1,5 @@
 import time
+import copy
 
 def dimacs_to_list(file_name):
     with open(file_name) as file:
@@ -15,12 +16,14 @@ def unit_clause(clauses):
 
 
 def simplify(clauses, l):
-    """ skip clauses with literal l, and remove -l from remaining literals """
+    """ skip clauses with literal l, remove -l from remaining clauses
+        and return deep copy """
     new_clauses = []
     for clause in clauses:
         if l not in clause:
-            clause.discard(-l)
-            new_clauses.append(clause)
+            new_clause = copy.deepcopy(clause)
+            new_clause.discard(-l)
+            new_clauses.append(new_clause)
     return new_clauses
 
 
@@ -92,4 +95,4 @@ print(test(CNF2, solution2))
 
 '''
 
-test_run('xdata/sudoku_hard.txt')
+# test_run('xdata/sudoku_hard.txt')
