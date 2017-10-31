@@ -37,7 +37,7 @@ def DPLL(clouses, val):
     l = clouses[0][0]
     val_l = DPLL(simplify(clouses, l), val.append(l))
     if val_l:
-        return l
+        return val_l
     else:
         return DPLL(simplify(clouses, -l), val.append(-l))
 
@@ -62,6 +62,7 @@ print(solution, test(CNF, solution))
 
 CNF2 = dimacs_to_list('sudoku2.txt')
 solution2 = DPLL(CNF2, [])
-print(test(CNF, solution2))
+print(test(CNF2, solution2))
 '''
+
 
