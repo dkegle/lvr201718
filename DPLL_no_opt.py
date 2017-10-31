@@ -10,12 +10,12 @@ def unit_clause(clauses):
     """ return literal from some unit clause, if it exists """
     for clause in clauses:
         if len(clause) == 1:
-            return next(iter(clause))
+            return next(iter(clause)) # first element
     return None
 
 
 def simplify(clauses, l):
-    """ remove clauses with literal l, and remove -l from remaining literals """
+    """ skip clauses with literal l, and remove -l from remaining literals """
     new_clauses = []
     for clause in clauses:
         if l not in clause:
@@ -30,7 +30,7 @@ def DPLL(clauses, val):
     l = unit_clause(clauses)
 
     while l:
-        val.append(l)
+        val.add(l)
         clauses = simplify(clauses, l)
         l = unit_clause(clauses)
 
@@ -44,14 +44,22 @@ def DPLL(clauses, val):
 
     # step 4: make assumptions l or not l
     l = next(iter(clauses[0]))
-    val_l = DPLL(simplify(clauses, l), val.append(l))
-    if val_l:
+    val.add(l)
+    new_clauses = simplify(clauses, l)
+    val_l = DPLL(new_clauses, val)
+    if val_l:   # val_l == val and not None
         return val_l
     else:
-        return DPLL(simplify(clauses, -l), val.append(-l))
+        val.discard(l)
+        val.add(-l)
+        new_clauses = simplify(clauses, -l)
+        return DPLL(new_clauses, val)
 
 
 def test(clauses, solution):
+    """ check if each clause evaluates to True under given solution """
+    if not solution:
+        return False
     for clause in clauses:
         sat = False
         for literal in clause:
@@ -68,7 +76,7 @@ def test(clauses, solution):
 def test_run(file):
     CNF = dimacs_to_list(file)
     start_time = time.time()
-    solution = DPLL(CNF, [])
+    solution = DPLL(CNF, set())
     print("Time needed " + str(time.time() - start_time) + " s")
     print(test(CNF, solution))
 
@@ -84,4 +92,4 @@ print(test(CNF2, solution2))
 
 '''
 
-# test_run('sudoku2.txt')
+test_run('xdata/sudoku_hard.txt')
