@@ -1,80 +1,83 @@
 import time
 import copy
 
+
 def dimacs_to_list(file_name):
     with open(file_name) as file:
         return [set([int(var) for var in line.split()[:-1]]) \
             for line in file if line[0] != 'c' and line[0] != 'p']
 
 
-def unit_clause(clauses):
-    """ return literal from some unit clause, if it exists """
+def get_unit_clauses(clauses):
+    """ return literals from unit clauses """
+    unit_clauses = set()    # avoid duplications
     for clause in clauses:
         if len(clause) == 1:
-            return next(iter(clause)) # first element
-    return None
+            unit_clauses.add(next(iter(clause))) # first element
+    return [c for c in unit_clauses]
 
 
-def simplify(clauses, l):
-    """ skip clauses with literal l, remove -l from remaining clauses
+def simplify(clauses, unit_clauses):
+    """ skip clauses with literals from unit clauses, remove -l from remaining 
         and return deep copy """
     new_clauses = []
+    neg_clauses = [-l for l in unit_clauses]
     for clause in clauses:
-        if l not in clause:
+        for literal in unit_clauses:
+            if literal in clause:
+                break
+        else:   # if no literal from unit_clauses is in clause
             new_clause = copy.deepcopy(clause)
-            new_clause.discard(-l)
+            new_clause = new_clause.difference(neg_clauses)
             new_clauses.append(new_clause)
     return new_clauses
 
 
 def DPLL(clauses, val):
 
-    c_val = copy.deepcopy(val)
-
     # step 1: filter unit clauses
-    l = unit_clause(clauses)
-
-    while l:
-        c_val.add(l)
-        clauses = simplify(clauses, l)
-        l = unit_clause(clauses)
+    unit_clauses = get_unit_clauses(clauses)
+    val_new = copy.deepcopy(val)
+    while len(unit_clauses) > 0:
+        val_new.update(unit_clauses)
+        clauses = simplify(clauses, unit_clauses)
+        unit_clauses = get_unit_clauses(clauses)
 
     # step 2: filter pure literals - skip
 
     # step 3: have we finished?
     if not clauses:
-        return c_val
+        return val_new
     if set() in clauses:
         return None
 
     # step 4: make assumptions l or not l
     l = next(iter(clauses[0]))
-    c_val.add(l)
-    new_clauses = simplify(clauses, l)
-    val_l = DPLL(new_clauses, c_val)
+    val_new.add(l)
+    new_clauses = simplify(clauses, [l])
+    val_l = DPLL(new_clauses, val_new)
     if val_l:
         return val_l
     else:
-        c_val.discard(l)
-        c_val.add(-l)
-        new_clauses = simplify(clauses, -l)
-        return DPLL(new_clauses, c_val)
+        val_new.discard(l)
+        val_new.add(-l)
+
+        new_clauses = simplify(clauses, [-l])
+        return DPLL(new_clauses, val_new)
 
 
 def test(clauses, solution):
-    """ check if each clause evaluates to True under given solution """
+    """ validity of solution """
     if not solution:
         return False
-    for l in solution:
+    for l in solution:  # check for contradictions
         if -l in solution:
             return False
-    for clause in clauses:
-        sat = False
+    for clause in clauses:  # check that clauses are true
         for literal in clause:
             if literal in solution:
-                sat=True
                 break
-        if not sat:
+        else:
             return False
     return True
 
