@@ -15,7 +15,7 @@ def get_unit_clauses(clauses):
     for clause in clauses:
         if len(clause) == 1:
             unit_clauses.add(next(iter(clause))) # first element
-    return [c for c in unit_clauses]
+    return unit_clauses
 
 
 def simplify(clauses, unit_clauses):
@@ -24,22 +24,32 @@ def simplify(clauses, unit_clauses):
     new_clauses = []
     neg_clauses = [-l for l in unit_clauses]
     for clause in clauses:
+        if len(clause) == 1:    # skip unit clauses
+            continue
+        if len(clause) == 0:    # contradiction
+            return [set()]
         for literal in unit_clauses:
             if literal in clause:
                 break
         else:   # if no literal from unit_clauses is in clause
             new_clause = copy.deepcopy(clause)
             new_clause = new_clause.difference(neg_clauses)
+            if len(new_clause) == 0: # found contradiction
+                return [set()]
             new_clauses.append(new_clause)
     return new_clauses
 
 
 def DPLL(clauses, val):
-
+    
     # step 1: filter unit clauses
     unit_clauses = get_unit_clauses(clauses)
     val_new = copy.deepcopy(val)
+
     while len(unit_clauses) > 0:
+        for uc in unit_clauses: # check for contradictions
+            if -uc in unit_clauses:
+                return None
         val_new.update(unit_clauses)
         clauses = simplify(clauses, unit_clauses)
         unit_clauses = get_unit_clauses(clauses)
@@ -105,5 +115,4 @@ print(test(CNF2, solution2))
 '''
 for filename in os.listdir('TESTS1_satisfiable'):
     print("\n"+filename)
-    test_run('TESTS1_satisfiable\\'+filename)
-
+    test_run('TESTS1_satisfiable\\' + filename)
