@@ -1,5 +1,6 @@
 import time
 import copy
+import os
 
 
 def dimacs_to_list(file_name):
@@ -102,5 +103,7 @@ solution2 = DPLL(CNF2, [])
 print(test(CNF2, solution2))
 
 '''
+for filename in os.listdir('TESTS1_satisfiable'):
+    print("\n"+filename)
+    test_run('TESTS1_satisfiable\\'+filename)
 
-# test_run('xdata/sudoku_hard.txt')
