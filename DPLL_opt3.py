@@ -15,12 +15,24 @@ class Clause:
     def __str__(self):
         return str(self.literals)
 
-
+start_time = 0
+RESTART_DPLL = -1
 def DPLL_setup(cnf):
+    global start_time
     clauses = []
     for i in range(len(cnf)):
         clauses.append(Clause(i, cnf[i]))
-    return DPLL_inc(clauses, set(), set(), dict())
+    orig_clauses = copy.deepcopy(clauses)
+
+    start_time = time.time()
+    solution = DPLL_inc(clauses, set(), set(), dict())
+    while solution == RESTART_DPLL:
+        print("Restarting")
+        clauses = copy.deepcopy(orig_clauses)
+        start_time = time.time()
+        solution = DPLL_inc(clauses, set(), set(), dict())
+
+    return solution
 
 
 def get_unit_clauses(clauses):
@@ -74,6 +86,8 @@ def undo_clauses(clauses, S_removed, S_modified):
 
 
 def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack set and one dictionay stack
+    if time.time() - start_time > 10.0:
+        return RESTART_DPLL
 
     # step 1: filter unit clauses
     unit_clauses = get_unit_clauses(clauses)
@@ -118,7 +132,9 @@ def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack s
     val_new.add(l)
     if simplify(clauses, [l], S_removed_1, S_modified_1):
         val_l = DPLL_inc(clauses, val_new, S_removed_1, S_modified_1)
-        if val_l:
+        if val_l == RESTART_DPLL:
+            return RESTART_DPLL
+        elif val_l:
             return val_l
 
     undo_clauses(clauses, S_removed_1, S_modified_1)
@@ -130,7 +146,9 @@ def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack s
 
     if simplify(clauses, [-l], S_removed_2, S_modified_2):
         val_l = DPLL_inc(clauses, val_new, S_removed_2, S_modified_2)
-        if val_l:
+        if val_l == RESTART_DPLL:
+            return RESTART_DPLL
+        elif val_l:
             return val_l
 
     undo_clauses(clauses, S_removed_2, S_modified_2)
@@ -163,7 +181,7 @@ def test(clauses, solution):
 
 def test_run(file):
     CNF = dimacs_to_list(file)
-    start_time = time.time()
+    total_time = time.time()
     solution = DPLL_setup(CNF)
     print("Time needed " + str(time.time() - start_time) + " s")
     print(test(CNF, solution))
@@ -178,9 +196,9 @@ def test_run(file):
 
 if __name__=="__main__":
     CNF = dimacs_to_list(sys.argv[1])
-    start_time = time.time()
+    total_time = time.time()
     solution = DPLL_setup(CNF)
-    print("Time needed " + str(time.time() - start_time) + " s")
+    print("Time needed " + str(time.time() - total_time) + " s")
     with open(sys.argv[2], 'w') as f:
         print("Writing solution to " + sys.argv[2])
         if test(CNF, solution):
