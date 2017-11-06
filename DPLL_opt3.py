@@ -1,9 +1,8 @@
 import time
 import copy
-import os
+import os, sys
 import random
 from collections import Counter
-
 
 class Clause:
     def __init__(self, id, literals):
@@ -166,7 +165,6 @@ def test_run(file):
     CNF = dimacs_to_list(file)
     start_time = time.time()
     solution = DPLL_setup(CNF)
-    print(solution)
     print("Time needed " + str(time.time() - start_time) + " s")
     print(test(CNF, solution))
 
@@ -174,3 +172,18 @@ def test_run(file):
 # for filename in os.listdir('test_data\\TESTS1_satisfiable'):
 #     print("\n" + filename)
 #     test_run('test_data\\TESTS1_satisfiable\\' + filename)
+
+
+# test_run('test_data\\graph-1000-2000-3.txt')
+
+if __name__=="__main__":
+    CNF = dimacs_to_list(sys.argv[1])
+    start_time = time.time()
+    solution = DPLL_setup(CNF)
+    print("Time needed " + str(time.time() - start_time) + " s")
+    with open(sys.argv[2], 'w') as f:
+        print("Writing solution to " + sys.argv[2])
+        if test(CNF, solution):
+            f.write(" ".join([str(l) for l in solution]))
+        else:
+            f.write("0")

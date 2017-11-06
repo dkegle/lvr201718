@@ -10,6 +10,12 @@ DPLL_opt2.py  --  unit propagation in chunks, loop instead of recursion
 
 DPLL_opt3.py  -- unit propagation in chunks, no deepcopy, heuristic for choosing literal
 
+Final version is DPLL_opt3.py, run it from command line:
+
+```
+python DPLL_opt3.py [input] [output]
+```
+
 ### Tests
 
 graph_coloring.py  --  generates random graphs and CNF for k-coloring
