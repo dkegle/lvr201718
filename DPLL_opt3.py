@@ -77,7 +77,7 @@ def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack s
 
     # step 1: filter unit clauses
     unit_clauses = get_unit_clauses(clauses)
-    val_new = copy.deepcopy(val)
+    val_new = set()# copy.deepcopy(val)
 
     while len(unit_clauses) > 0:
         for uc in unit_clauses:  # check for contradictions
@@ -119,6 +119,7 @@ def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack s
     if simplify(clauses, [l], S_removed_1, S_modified_1):
         val_l = DPLL_inc(clauses, val_new, S_removed_1, S_modified_1)
         if val_l:
+            val_l.update(val)
             return val_l
 
     undo_clauses(clauses, S_removed_1, S_modified_1)
@@ -131,6 +132,7 @@ def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack s
     if simplify(clauses, [-l], S_removed_2, S_modified_2):
         val_l = DPLL_inc(clauses, val_new, S_removed_2, S_modified_2)
         if val_l:
+            val_l.update(val)
             return val_l
 
     undo_clauses(clauses, S_removed_2, S_modified_2)
