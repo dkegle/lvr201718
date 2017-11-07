@@ -16,8 +16,6 @@ graph_coloring.py  --  generates random graphs and CNF for k-coloring
 
 test_data/  --  contains test data in DIMACS format from various sources
 
-test_data/graph-1000-2000-3.txt  --  example generated with graph_coloring.py (random graph on 1000 vertices and 2000 edges, typically solved under 30 sec)
-
 ### Usage
 
 Final solver is DPLL_opt3.py, run it from command line:
