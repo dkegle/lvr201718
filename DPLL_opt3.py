@@ -17,8 +17,10 @@ class Clause:
 
 start_time = 0
 RESTART_DPLL = -1
+MAX_TIME = 10.0
+
 def DPLL_setup(cnf):
-    global start_time
+    global start_time, MAX_TIME
     clauses = []
     for i in range(len(cnf)):
         clauses.append(Clause(i, cnf[i]))
@@ -28,6 +30,7 @@ def DPLL_setup(cnf):
     solution = DPLL_inc(clauses, set(), set(), dict())
     while solution == RESTART_DPLL:
         print("Restarting")
+        MAX_TIME *= 1.25 # increase time limit
         clauses = copy.deepcopy(orig_clauses)
         start_time = time.time()
         solution = DPLL_inc(clauses, set(), set(), dict())
@@ -86,7 +89,7 @@ def undo_clauses(clauses, S_removed, S_modified):
 
 
 def DPLL_inc(clauses, val, S_removed, S_modified):  # TODO: use only one stack set and one dictionay stack
-    if time.time() - start_time > 10.0:
+    if time.time() - start_time > MAX_TIME:
         return RESTART_DPLL
 
     # step 1: filter unit clauses
